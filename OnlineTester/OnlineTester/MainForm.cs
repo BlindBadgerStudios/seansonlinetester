@@ -11,16 +11,23 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Management;
 using System.IO;
+using System.ServiceProcess;
+
+//Version History:
+//V1: Commandline, hard-coded values
+//V2: Commandline, arguments to customize some values
+//V3: GUI: Threaded checks, hard-coded WMI values, enabled groups of hosts to be checked
+//V4: Rebuild (due to loss of previous code).  Service checks (customizable), WMI checks (customizable)
 
 //ToDo:
 //- Add option to turn off dns double verification
 //- Add support for IPv6
-//- Add support for running WMI queries under alternate credentials
+//- Add support for auto-updating to newest published version
 namespace OnlineTester
 {
     public partial class MainForm : Form
     {
-        private Thread mainThread, pingThread, dnsThread, wmiThread;
+        private Thread mainThread, pingThread, dnsThread, svcThread, wmiThread;
         private ConnectionOptions oConn = new ConnectionOptions();
         private bool altCred = false;
         private string userN = "";
@@ -29,11 +36,12 @@ namespace OnlineTester
         private ObjectQuery oQuery;
         private string customWMIPath = "\\root\\cimv2";
         private string customWMIQuery = "Select Username from Win32_ComputerSystem";
+        private string svcName = "Contego_Spop";
 
         public MainForm()
         {
             InitializeComponent();
-            chkUser.Text = "Check " + dgComputers.Columns[4].HeaderText;
+            chkUser.Text = "Check " + dgComputers.Columns[5].HeaderText;
         }
 
         #region Threadsafe Status Methods
@@ -57,6 +65,25 @@ namespace OnlineTester
             return chkOS.Checked;
         }
 
+        private delegate bool checkSvcDelegate();
+        private bool checkSvc()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new checkSvcDelegate(checkSvc));
+            }
+            return chkSvc.Checked;
+        }
+
+        private delegate void updateMainStatusDelegate(string newStatus);
+        private void updateMainStatus(string newStatus)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new updateMainStatusDelegate(updateMainStatus), new object[] { newStatus });
+            }
+            lblMainStatus.Text = newStatus;
+        }
         private delegate void updateDnsStatusDelegate(string newStatus);
         private void updateDnsStatus(string newStatus)
         {
@@ -74,6 +101,16 @@ namespace OnlineTester
                 Invoke(new updatePingStatusDelegate(updatePingStatus), new object[] { newStatus });
             }
             lblPingStatus.Text = newStatus;
+        }
+
+        private delegate void updateSvcStatusDelegate(string newStatus);
+        private void updateSvcStatus(string newStatus)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new updateSvcStatusDelegate(updateSvcStatus), new object[] { newStatus });
+            }
+            lblSvcStatus.Text = newStatus;
         }
 
         private delegate void updateWmiStatusDelegate(string newStatus);
@@ -118,7 +155,7 @@ namespace OnlineTester
             dgComputers.Rows[y].Cells[x].Value = myStr;
 
             //color appropriately for errors
-            if (myStr.ToLower().StartsWith("error") || myStr.ToLower().StartsWith("dead"))
+            if (myStr.ToLower().StartsWith("err") || myStr.ToLower().StartsWith("dead"))
             {
                 dgComputers.Rows[y].Cells[x].Style.BackColor = Color.Red;
             }
@@ -130,6 +167,10 @@ namespace OnlineTester
             {
                 dgComputers.Rows[y].Cells[x].Style.BackColor = Color.Green;
             }
+            else
+            {
+                dgComputers.Rows[y].Cells[x].Style.BackColor = dgComputers.Rows[y].Cells[x].Style.BackColor;
+            }
         }
 
         private delegate string dgReadDelegate(int y, int x);
@@ -140,6 +181,22 @@ namespace OnlineTester
                 Invoke(new dgReadDelegate(dgRead), new object[] { y, x });
             }
             return dgComputers.Rows[y].Cells[x].Value.ToString();
+        }
+
+        private delegate bool dgThreadComplete();
+        private bool threadComplete()
+        {
+            if (lblDnsStatus.Text == "DNS Thread Ready" &&
+                lblPingStatus.Text == "Ping Thread Ready" &&
+                lblSvcStatus.Text == "Service Thread Ready" &&
+                lblWmiStatus.Text == "WMI Thread Ready")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         #endregion
 
@@ -198,6 +255,7 @@ namespace OnlineTester
                 dnsThread.Abort();
                 pingThread.Abort();
                 wmiThread.Abort();
+                timer1.Stop();
 
                 while (mainThread.ThreadState == ThreadState.Running || mainThread.ThreadState == ThreadState.WaitSleepJoin)
                 {
@@ -213,14 +271,18 @@ namespace OnlineTester
                 //start new thread main thread
                 btnGo.Text = "Stop Tests";
                 //clear old data for a clean run
+                lblMainStatus.Text = "Clearing Old Data";
                 for (int i = 0; i < dgCount; i++)
                 {
                     dgComputers.Rows[i].Cells[2].Value = "";
                     dgComputers.Rows[i].Cells[3].Value = "";
                     dgComputers.Rows[i].Cells[4].Value = "";
+                    dgComputers.Rows[i].Cells[5].Value = "";
                 }
+                lblMainStatus.Text = "Starting Main Thread";
                 mainThread = new Thread(new ThreadStart(mainThreadRun));
                 mainThread.Start();
+                timer1.Start();
                 lblMainStatus.Text = "Running Tests";
             }
         }
@@ -238,17 +300,25 @@ namespace OnlineTester
             updatePingStatus("Ping Thread Starting...");
             pingThread.Start();
 
+            svcThread = new Thread(new ThreadStart(svcThreadRun));
+            updateSvcStatus("Service Thread Starting...");
+            svcThread.Start();
+
             wmiThread = new Thread(new ThreadStart(wmiThreadRun));
             updateWmiStatus("WMI Thread Starting...");
             wmiThread.Start();
 
-            //don't end this thread until all the other threads are finished
-            while (dnsThread.ThreadState == ThreadState.Running ||
+            /*while (dnsThread.ThreadState == ThreadState.Running ||
                 pingThread.ThreadState == ThreadState.Running ||
-                wmiThread.ThreadState == ThreadState.Running)
+                svcThread.ThreadState == ThreadState.Running ||
+                wmiThread.ThreadState == ThreadState.Running)*/
+            //don't end this thread until all the other threads are finished
+            while(!threadComplete())
             {
                 Thread.Sleep(1000);
             }
+
+            updateMainStatus("Main Thread Ready");
         }
 
         private void dnsThreadRun()
@@ -273,6 +343,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: No DNS Entry");
                     dgInput(i, 3, "Error: No DNS Entry");
                     dgInput(i, 4, "Error: No DNS Entry");
+                    dgInput(i, 5, "Error: No DNS Entry");
                     continue;
                 }
 
@@ -285,6 +356,7 @@ namespace OnlineTester
                         dgInput(i, 2, "Error: Bad DNS Entry");
                         dgInput(i, 3, "Error: Bad DNS Entry");
                         dgInput(i, 4, "Error: Bad DNS Entry");
+                        dgInput(i, 5, "Error: Bad DNS Entry");
 
                     }
                     dgInput(i, 0, iph1.HostName);
@@ -297,6 +369,7 @@ namespace OnlineTester
                         dgInput(i, 2, "Error: Bad DNS Entry");
                         dgInput(i, 3, "Error: Bad DNS Entry");
                         dgInput(i, 4, "Error: Bad DNS Entry");
+                        dgInput(i, 5, "Error: Bad DNS Entry");
 
                     }
                     dgInput(i, 1, iph1.AddressList.First().ToString());
@@ -319,7 +392,7 @@ namespace OnlineTester
                 //if resolution is not yet complete for this row, sleep until it is
                 while (dgRead(i, 0).Length < 1 || dgRead(i, 1).Length < 1)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1);
                 }
 
                 //skip row if error occured during dns resolution
@@ -342,6 +415,7 @@ namespace OnlineTester
                         dgInput(i, 2, "Offline");
                         dgInput(i, 3, "Offline");
                         dgInput(i, 4, "Offline");
+                        dgInput(i, 5, "Offline");
                     }
                 }
                 catch (Exception ex)
@@ -349,6 +423,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: Ping");
                     dgInput(i, 3, "Error: Ping");
                     dgInput(i, 4, "Error: Ping");
+                    dgInput(i, 5, "Error: Ping");
                 }
                 //this is to allow for interruption
                 Thread.Sleep(1);
@@ -356,6 +431,63 @@ namespace OnlineTester
             updatePingStatus("Ping Test Complete");
             Thread.Sleep(2000);
             updatePingStatus("Ping Thread Ready");
+        }
+
+        private void svcThreadRun()
+        {
+            //loop through computer list
+            for (int i = 0; i < dgCount; i++)
+            {
+                string target; 
+
+                //wait for other threads to finish if we end up moving too fast
+                while (dgRead(i, 2).Length < 1)
+                {
+                    Thread.Sleep(1);
+                }
+
+                //skip over offline or error readings
+                if (dgRead(i, 4).ToLower().StartsWith("error") || dgRead(i, 4).ToLower().StartsWith("offline"))
+                {
+                    continue;
+                }
+
+                if (checkSvc())
+                {
+                    target = dgRead(i, 0);
+                    updateWmiStatus("WMI: Checking OS Version (" + target + ")");
+                    dgInput(i, 3, checkService(target));
+                }
+
+                //this is to allow for interruption
+                Thread.Sleep(1);
+            }
+
+            updateSvcStatus("Service Tests Complete");
+            Thread.Sleep(2000);
+            updateSvcStatus("Service Thread Ready");
+        }
+
+        private string checkService(string target)
+        {
+            ServiceController sc = new ServiceController(svcName, target);
+            string returnme = "";
+            //display service status
+            try
+            {
+                returnme = sc.Status.ToString();
+            }
+            catch (Exception ex)
+            {
+                returnme = "Err: Not Installed";
+
+                if (ex.ToString().Contains("Access is denied"))
+                {
+                    returnme = "Err: Permission";
+                }
+            }
+
+            return returnme;
         }
 
         private void wmiThreadRun()
@@ -380,11 +512,11 @@ namespace OnlineTester
                 //wait for other threads to finish if we end up moving too fast
                 while (dgRead(i, 2).Length < 1)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1);
                 }
 
                 //skip over offline or error readings
-                if (dgRead(i, 3).ToLower().StartsWith("error") || dgRead(i, 3).ToLower().StartsWith("offline"))
+                if (dgRead(i, 4).ToLower().StartsWith("error") || dgRead(i, 4).ToLower().StartsWith("offline"))
                 {
                     continue;
                 }
@@ -393,7 +525,7 @@ namespace OnlineTester
                 {
                     target = dgRead(i, 0);
                     updateWmiStatus("WMI: Checking OS Version (" + target + ")");
-                    dgInput(i, 3, wmiCheckOS(target));
+                    dgInput(i, 4, wmiCheckOS(target));
                 }
 
                 //this is to allow for interruption
@@ -402,7 +534,7 @@ namespace OnlineTester
                 if (checkWMI())
                 {
                     updateWmiStatus("WMI: Checking " + dgComputers.Columns[4].HeaderText + " (" + target + ")");
-                    dgInput(i, 4, wmiCheckCustom(target));
+                    dgInput(i, 5, wmiCheckCustom(target));
                 }
 
                 //this is to allow for interruption
@@ -452,8 +584,12 @@ namespace OnlineTester
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
                 returnme = "Error: WMI";
+
+                if (ex.ToString().ToLower().Contains("null"))
+                {
+                    returnme = "<Empty>";
+                }
             }
             return returnme;
         }
@@ -552,12 +688,10 @@ namespace OnlineTester
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (dnsThread.ThreadState == ThreadState.Stopped
-                    || pingThread.ThreadState == ThreadState.Stopped
-                    || wmiThread.ThreadState == ThreadState.Stopped
-                    || mainThread.ThreadState == ThreadState.Stopped)
+            if (lblMainStatus.Text == "Main Thread Ready")
             {
                 btnGo.Text = "Run Tests";
+                timer1.Stop();
             }
         }
 
@@ -597,6 +731,22 @@ namespace OnlineTester
                 altCred = cred.altEnable;
                 userN = cred.uName;
                 passW = cred.pWord;
+            }
+            else
+            {
+                //no changes
+            }
+        }
+
+        private void changeServiceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Service svc = new Service();
+            svc.svcName = svcName;
+
+            if (svc.ShowDialog() == DialogResult.OK)
+            {
+                //save information to variables
+                svcName = svc.svcName;
             }
             else
             {
