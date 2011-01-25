@@ -30,11 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.dgComputers = new System.Windows.Forms.DataGridView();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colOS = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colUser = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblMainStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSeperator1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -47,9 +42,12 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hostListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fullResultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.alternateCredentialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customWMIReplacesLastColumnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,9 +59,16 @@
             this.chkUser = new System.Windows.Forms.CheckBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.chkOS = new System.Windows.Forms.CheckBox();
-            this.alternateCredentialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hostListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fullResultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkSvc = new System.Windows.Forms.CheckBox();
+            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSvc = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUser = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblSvcStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.changeServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgComputers)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -83,42 +88,14 @@
             this.colName,
             this.colIP,
             this.colStatus,
+            this.colSvc,
             this.colOS,
             this.colUser});
             this.dgComputers.Location = new System.Drawing.Point(12, 53);
             this.dgComputers.Name = "dgComputers";
             this.dgComputers.RowHeadersVisible = false;
-            this.dgComputers.Size = new System.Drawing.Size(618, 217);
+            this.dgComputers.Size = new System.Drawing.Size(688, 259);
             this.dgComputers.TabIndex = 0;
-            // 
-            // colName
-            // 
-            this.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colName.HeaderText = "Name";
-            this.colName.Name = "colName";
-            // 
-            // colIP
-            // 
-            this.colIP.HeaderText = "IP Address";
-            this.colIP.Name = "colIP";
-            this.colIP.Width = 90;
-            // 
-            // colStatus
-            // 
-            this.colStatus.HeaderText = "Status";
-            this.colStatus.Name = "colStatus";
-            this.colStatus.Width = 80;
-            // 
-            // colOS
-            // 
-            this.colOS.HeaderText = "Operating System";
-            this.colOS.Name = "colOS";
-            // 
-            // colUser
-            // 
-            this.colUser.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colUser.HeaderText = "Logged In User";
-            this.colUser.Name = "colUser";
             // 
             // statusStrip1
             // 
@@ -126,13 +103,15 @@
             this.lblMainStatus,
             this.lblSeperator1,
             this.lblDnsStatus,
-            this.lblSeperator2,
+            this.toolStripStatusLabel2,
             this.lblPingStatus,
+            this.lblSeperator2,
+            this.lblSvcStatus,
             this.lblSeperator3,
             this.lblWmiStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 273);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 315);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(642, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(712, 22);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -187,7 +166,7 @@
             this.btnGo});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(642, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(712, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -215,8 +194,22 @@
             this.hostListToolStripMenuItem,
             this.fullResultsToolStripMenuItem});
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
             this.exportToolStripMenuItem.Text = "Export...";
+            // 
+            // hostListToolStripMenuItem
+            // 
+            this.hostListToolStripMenuItem.Name = "hostListToolStripMenuItem";
+            this.hostListToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.hostListToolStripMenuItem.Text = "Host List";
+            this.hostListToolStripMenuItem.Click += new System.EventHandler(this.hostListToolStripMenuItem_Click);
+            // 
+            // fullResultsToolStripMenuItem
+            // 
+            this.fullResultsToolStripMenuItem.Name = "fullResultsToolStripMenuItem";
+            this.fullResultsToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.fullResultsToolStripMenuItem.Text = "Full Results";
+            this.fullResultsToolStripMenuItem.Click += new System.EventHandler(this.fullResultsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -234,16 +227,24 @@
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.alternateCredentialsToolStripMenuItem,
+            this.changeServiceToolStripMenuItem,
             this.customWMIReplacesLastColumnToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
+            // alternateCredentialsToolStripMenuItem
+            // 
+            this.alternateCredentialsToolStripMenuItem.Name = "alternateCredentialsToolStripMenuItem";
+            this.alternateCredentialsToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.alternateCredentialsToolStripMenuItem.Text = "Alternate Credentials";
+            this.alternateCredentialsToolStripMenuItem.Click += new System.EventHandler(this.alternateCredentialsToolStripMenuItem_Click);
+            // 
             // customWMIReplacesLastColumnToolStripMenuItem
             // 
             this.customWMIReplacesLastColumnToolStripMenuItem.Name = "customWMIReplacesLastColumnToolStripMenuItem";
-            this.customWMIReplacesLastColumnToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
-            this.customWMIReplacesLastColumnToolStripMenuItem.Text = "Custom WMI (Replaces last column)";
+            this.customWMIReplacesLastColumnToolStripMenuItem.Size = new System.Drawing.Size(300, 22);
+            this.customWMIReplacesLastColumnToolStripMenuItem.Text = "Change WMI Query (Replaces last column)";
             this.customWMIReplacesLastColumnToolStripMenuItem.Click += new System.EventHandler(this.customWMIReplacesLastColumnToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
@@ -289,7 +290,7 @@
             // btnClearList
             // 
             this.btnClearList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClearList.Location = new System.Drawing.Point(564, 27);
+            this.btnClearList.Location = new System.Drawing.Point(634, 27);
             this.btnClearList.Name = "btnClearList";
             this.btnClearList.Size = new System.Drawing.Size(66, 21);
             this.btnClearList.TabIndex = 5;
@@ -312,7 +313,7 @@
             this.chkUser.AutoSize = true;
             this.chkUser.Checked = true;
             this.chkUser.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkUser.Location = new System.Drawing.Point(345, 29);
+            this.chkUser.Location = new System.Drawing.Point(447, 29);
             this.chkUser.Name = "chkUser";
             this.chkUser.Size = new System.Drawing.Size(133, 17);
             this.chkUser.TabIndex = 9;
@@ -328,39 +329,84 @@
             this.chkOS.AutoSize = true;
             this.chkOS.Checked = true;
             this.chkOS.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOS.Location = new System.Drawing.Point(264, 30);
+            this.chkOS.Location = new System.Drawing.Point(366, 29);
             this.chkOS.Name = "chkOS";
             this.chkOS.Size = new System.Drawing.Size(75, 17);
             this.chkOS.TabIndex = 10;
             this.chkOS.Text = "Check OS";
             this.chkOS.UseVisualStyleBackColor = true;
             // 
-            // alternateCredentialsToolStripMenuItem
+            // chkSvc
             // 
-            this.alternateCredentialsToolStripMenuItem.Name = "alternateCredentialsToolStripMenuItem";
-            this.alternateCredentialsToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
-            this.alternateCredentialsToolStripMenuItem.Text = "Alternate Credentials";
-            this.alternateCredentialsToolStripMenuItem.Click += new System.EventHandler(this.alternateCredentialsToolStripMenuItem_Click);
+            this.chkSvc.AutoSize = true;
+            this.chkSvc.Checked = true;
+            this.chkSvc.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSvc.Location = new System.Drawing.Point(264, 29);
+            this.chkSvc.Name = "chkSvc";
+            this.chkSvc.Size = new System.Drawing.Size(96, 17);
+            this.chkSvc.TabIndex = 11;
+            this.chkSvc.Text = "Check Service";
+            this.chkSvc.UseVisualStyleBackColor = true;
             // 
-            // hostListToolStripMenuItem
+            // colName
             // 
-            this.hostListToolStripMenuItem.Name = "hostListToolStripMenuItem";
-            this.hostListToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.hostListToolStripMenuItem.Text = "Host List";
-            this.hostListToolStripMenuItem.Click += new System.EventHandler(this.hostListToolStripMenuItem_Click);
+            this.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colName.HeaderText = "Name";
+            this.colName.Name = "colName";
             // 
-            // fullResultsToolStripMenuItem
+            // colIP
             // 
-            this.fullResultsToolStripMenuItem.Name = "fullResultsToolStripMenuItem";
-            this.fullResultsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.fullResultsToolStripMenuItem.Text = "Full Results";
-            this.fullResultsToolStripMenuItem.Click += new System.EventHandler(this.fullResultsToolStripMenuItem_Click);
+            this.colIP.HeaderText = "IP Address";
+            this.colIP.Name = "colIP";
+            this.colIP.Width = 90;
+            // 
+            // colStatus
+            // 
+            this.colStatus.HeaderText = "Status";
+            this.colStatus.Name = "colStatus";
+            this.colStatus.Width = 80;
+            // 
+            // colSvc
+            // 
+            this.colSvc.HeaderText = "Service";
+            this.colSvc.Name = "colSvc";
+            // 
+            // colOS
+            // 
+            this.colOS.HeaderText = "Operating System";
+            this.colOS.Name = "colOS";
+            // 
+            // colUser
+            // 
+            this.colUser.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colUser.HeaderText = "Logged In User";
+            this.colUser.Name = "colUser";
+            // 
+            // lblSvcStatus
+            // 
+            this.lblSvcStatus.Name = "lblSvcStatus";
+            this.lblSvcStatus.Size = new System.Drawing.Size(119, 17);
+            this.lblSvcStatus.Text = "Service Thread Ready";
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(10, 17);
+            this.toolStripStatusLabel2.Text = "|";
+            // 
+            // changeServiceToolStripMenuItem
+            // 
+            this.changeServiceToolStripMenuItem.Name = "changeServiceToolStripMenuItem";
+            this.changeServiceToolStripMenuItem.Size = new System.Drawing.Size(300, 22);
+            this.changeServiceToolStripMenuItem.Text = "Change Service";
+            this.changeServiceToolStripMenuItem.Click += new System.EventHandler(this.changeServiceToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(642, 295);
+            this.ClientSize = new System.Drawing.Size(712, 337);
+            this.Controls.Add(this.chkSvc);
             this.Controls.Add(this.chkOS);
             this.Controls.Add(this.chkUser);
             this.Controls.Add(this.btnAdd);
@@ -372,7 +418,7 @@
             this.Controls.Add(this.dgComputers);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Online Tester 4.1 Beta";
+            this.Text = "Online Tester 4.2 Beta";
             ((System.ComponentModel.ISupportInitialize)(this.dgComputers)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -400,11 +446,6 @@
         private System.Windows.Forms.Label lblComputer;
         private System.Windows.Forms.TextBox txtComputer;
         private System.Windows.Forms.Button btnClearList;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colIP;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colOS;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colUser;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.ToolStripStatusLabel lblSeperator1;
         private System.Windows.Forms.ToolStripStatusLabel lblDnsStatus;
@@ -420,6 +461,16 @@
         private System.Windows.Forms.ToolStripMenuItem alternateCredentialsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hostListToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fullResultsToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colIP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSvc;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colOS;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUser;
+        private System.Windows.Forms.CheckBox chkSvc;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel lblSvcStatus;
+        private System.Windows.Forms.ToolStripMenuItem changeServiceToolStripMenuItem;
     }
 }
 
