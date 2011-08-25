@@ -30,12 +30,20 @@
         {
             this.components = new System.ComponentModel.Container();
             this.dgComputers = new System.Windows.Forms.DataGridView();
+            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSvc = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUser = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblMainStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSeperator1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblDnsStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblSeperator2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblPingStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblSeperator2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblSvcStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSeperator3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblWmiStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -48,6 +56,7 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alternateCredentialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customWMIReplacesLastColumnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,15 +69,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.chkOS = new System.Windows.Forms.CheckBox();
             this.chkSvc = new System.Windows.Forms.CheckBox();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSvc = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colOS = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colUser = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lblSvcStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.changeServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgComputers)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -94,8 +95,43 @@
             this.dgComputers.Location = new System.Drawing.Point(12, 53);
             this.dgComputers.Name = "dgComputers";
             this.dgComputers.RowHeadersVisible = false;
+            this.dgComputers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgComputers.Size = new System.Drawing.Size(688, 259);
             this.dgComputers.TabIndex = 0;
+            // 
+            // colName
+            // 
+            this.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colName.HeaderText = "Name";
+            this.colName.Name = "colName";
+            // 
+            // colIP
+            // 
+            this.colIP.HeaderText = "IP Address";
+            this.colIP.Name = "colIP";
+            this.colIP.Width = 90;
+            // 
+            // colStatus
+            // 
+            this.colStatus.HeaderText = "Status";
+            this.colStatus.Name = "colStatus";
+            this.colStatus.Width = 80;
+            // 
+            // colSvc
+            // 
+            this.colSvc.HeaderText = "Service";
+            this.colSvc.Name = "colSvc";
+            // 
+            // colOS
+            // 
+            this.colOS.HeaderText = "Operating System";
+            this.colOS.Name = "colOS";
+            // 
+            // colUser
+            // 
+            this.colUser.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colUser.HeaderText = "Logged In User";
+            this.colUser.Name = "colUser";
             // 
             // statusStrip1
             // 
@@ -118,43 +154,55 @@
             // lblMainStatus
             // 
             this.lblMainStatus.Name = "lblMainStatus";
-            this.lblMainStatus.Size = new System.Drawing.Size(109, 17);
+            this.lblMainStatus.Size = new System.Drawing.Size(100, 17);
             this.lblMainStatus.Text = "Main Thread Ready";
             // 
             // lblSeperator1
             // 
             this.lblSeperator1.Name = "lblSeperator1";
-            this.lblSeperator1.Size = new System.Drawing.Size(10, 17);
+            this.lblSeperator1.Size = new System.Drawing.Size(11, 17);
             this.lblSeperator1.Text = "|";
             // 
             // lblDnsStatus
             // 
             this.lblDnsStatus.Name = "lblDnsStatus";
-            this.lblDnsStatus.Size = new System.Drawing.Size(105, 17);
+            this.lblDnsStatus.Size = new System.Drawing.Size(98, 17);
             this.lblDnsStatus.Text = "DNS Thread Ready";
             // 
-            // lblSeperator2
+            // toolStripStatusLabel2
             // 
-            this.lblSeperator2.Name = "lblSeperator2";
-            this.lblSeperator2.Size = new System.Drawing.Size(10, 17);
-            this.lblSeperator2.Text = "|";
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(11, 17);
+            this.toolStripStatusLabel2.Text = "|";
             // 
             // lblPingStatus
             // 
             this.lblPingStatus.Name = "lblPingStatus";
-            this.lblPingStatus.Size = new System.Drawing.Size(106, 17);
+            this.lblPingStatus.Size = new System.Drawing.Size(98, 17);
             this.lblPingStatus.Text = "Ping Thread Ready";
+            // 
+            // lblSeperator2
+            // 
+            this.lblSeperator2.Name = "lblSeperator2";
+            this.lblSeperator2.Size = new System.Drawing.Size(11, 17);
+            this.lblSeperator2.Text = "|";
+            // 
+            // lblSvcStatus
+            // 
+            this.lblSvcStatus.Name = "lblSvcStatus";
+            this.lblSvcStatus.Size = new System.Drawing.Size(113, 17);
+            this.lblSvcStatus.Text = "Service Thread Ready";
             // 
             // lblSeperator3
             // 
             this.lblSeperator3.Name = "lblSeperator3";
-            this.lblSeperator3.Size = new System.Drawing.Size(10, 17);
+            this.lblSeperator3.Size = new System.Drawing.Size(11, 17);
             this.lblSeperator3.Text = "|";
             // 
             // lblWmiStatus
             // 
             this.lblWmiStatus.Name = "lblWmiStatus";
-            this.lblWmiStatus.Size = new System.Drawing.Size(107, 17);
+            this.lblWmiStatus.Size = new System.Drawing.Size(100, 17);
             this.lblWmiStatus.Text = "WMI Thread Ready";
             // 
             // menuStrip1
@@ -178,48 +226,49 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.importToolStripMenuItem.Text = "Import...";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.selectionToolStripMenuItem,
             this.hostListToolStripMenuItem,
             this.fullResultsToolStripMenuItem});
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exportToolStripMenuItem.Text = "Export...";
             // 
             // hostListToolStripMenuItem
             // 
             this.hostListToolStripMenuItem.Name = "hostListToolStripMenuItem";
-            this.hostListToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.hostListToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.hostListToolStripMenuItem.Text = "Host List";
             this.hostListToolStripMenuItem.Click += new System.EventHandler(this.hostListToolStripMenuItem_Click);
             // 
             // fullResultsToolStripMenuItem
             // 
             this.fullResultsToolStripMenuItem.Name = "fullResultsToolStripMenuItem";
-            this.fullResultsToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.fullResultsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.fullResultsToolStripMenuItem.Text = "Full Results";
             this.fullResultsToolStripMenuItem.Click += new System.EventHandler(this.fullResultsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(116, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -230,20 +279,27 @@
             this.changeServiceToolStripMenuItem,
             this.customWMIReplacesLastColumnToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // alternateCredentialsToolStripMenuItem
             // 
             this.alternateCredentialsToolStripMenuItem.Name = "alternateCredentialsToolStripMenuItem";
-            this.alternateCredentialsToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.alternateCredentialsToolStripMenuItem.Size = new System.Drawing.Size(290, 22);
             this.alternateCredentialsToolStripMenuItem.Text = "Alternate Credentials";
             this.alternateCredentialsToolStripMenuItem.Click += new System.EventHandler(this.alternateCredentialsToolStripMenuItem_Click);
+            // 
+            // changeServiceToolStripMenuItem
+            // 
+            this.changeServiceToolStripMenuItem.Name = "changeServiceToolStripMenuItem";
+            this.changeServiceToolStripMenuItem.Size = new System.Drawing.Size(290, 22);
+            this.changeServiceToolStripMenuItem.Text = "Change Service";
+            this.changeServiceToolStripMenuItem.Click += new System.EventHandler(this.changeServiceToolStripMenuItem_Click);
             // 
             // customWMIReplacesLastColumnToolStripMenuItem
             // 
             this.customWMIReplacesLastColumnToolStripMenuItem.Name = "customWMIReplacesLastColumnToolStripMenuItem";
-            this.customWMIReplacesLastColumnToolStripMenuItem.Size = new System.Drawing.Size(300, 22);
+            this.customWMIReplacesLastColumnToolStripMenuItem.Size = new System.Drawing.Size(290, 22);
             this.customWMIReplacesLastColumnToolStripMenuItem.Text = "Change WMI Query (Replaces last column)";
             this.customWMIReplacesLastColumnToolStripMenuItem.Click += new System.EventHandler(this.customWMIReplacesLastColumnToolStripMenuItem_Click);
             // 
@@ -252,13 +308,13 @@
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.aboutToolStripMenuItem.Text = "About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -266,7 +322,7 @@
             // 
             this.btnGo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.btnGo.Name = "btnGo";
-            this.btnGo.Size = new System.Drawing.Size(70, 20);
+            this.btnGo.Size = new System.Drawing.Size(67, 20);
             this.btnGo.Text = "Run Tests";
             this.btnGo.Click += new System.EventHandler(this.btnGo_Click);
             // 
@@ -348,58 +404,12 @@
             this.chkSvc.Text = "Check Service";
             this.chkSvc.UseVisualStyleBackColor = true;
             // 
-            // colName
+            // selectionToolStripMenuItem
             // 
-            this.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colName.HeaderText = "Name";
-            this.colName.Name = "colName";
-            // 
-            // colIP
-            // 
-            this.colIP.HeaderText = "IP Address";
-            this.colIP.Name = "colIP";
-            this.colIP.Width = 90;
-            // 
-            // colStatus
-            // 
-            this.colStatus.HeaderText = "Status";
-            this.colStatus.Name = "colStatus";
-            this.colStatus.Width = 80;
-            // 
-            // colSvc
-            // 
-            this.colSvc.HeaderText = "Service";
-            this.colSvc.Name = "colSvc";
-            // 
-            // colOS
-            // 
-            this.colOS.HeaderText = "Operating System";
-            this.colOS.Name = "colOS";
-            // 
-            // colUser
-            // 
-            this.colUser.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colUser.HeaderText = "Logged In User";
-            this.colUser.Name = "colUser";
-            // 
-            // lblSvcStatus
-            // 
-            this.lblSvcStatus.Name = "lblSvcStatus";
-            this.lblSvcStatus.Size = new System.Drawing.Size(119, 17);
-            this.lblSvcStatus.Text = "Service Thread Ready";
-            // 
-            // toolStripStatusLabel2
-            // 
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(10, 17);
-            this.toolStripStatusLabel2.Text = "|";
-            // 
-            // changeServiceToolStripMenuItem
-            // 
-            this.changeServiceToolStripMenuItem.Name = "changeServiceToolStripMenuItem";
-            this.changeServiceToolStripMenuItem.Size = new System.Drawing.Size(300, 22);
-            this.changeServiceToolStripMenuItem.Text = "Change Service";
-            this.changeServiceToolStripMenuItem.Click += new System.EventHandler(this.changeServiceToolStripMenuItem_Click);
+            this.selectionToolStripMenuItem.Name = "selectionToolStripMenuItem";
+            this.selectionToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.selectionToolStripMenuItem.Text = "Selected Rows";
+            this.selectionToolStripMenuItem.Click += new System.EventHandler(this.selectionToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -418,7 +428,7 @@
             this.Controls.Add(this.dgComputers);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Online Tester 4.2 Beta";
+            this.Text = "Online Tester 4.2 Beta r6";
             ((System.ComponentModel.ISupportInitialize)(this.dgComputers)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -471,6 +481,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripStatusLabel lblSvcStatus;
         private System.Windows.Forms.ToolStripMenuItem changeServiceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectionToolStripMenuItem;
     }
 }
 
