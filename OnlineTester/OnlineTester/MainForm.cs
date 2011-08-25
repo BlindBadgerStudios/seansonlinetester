@@ -200,6 +200,17 @@ namespace OnlineTester
         }
         #endregion
 
+        //return whether any cell in this row is selected
+        private bool isSelected(int i)
+        {
+            bool result = false;
+            if (dgComputers.Rows[i].Selected)
+            {
+                result = true;
+            }
+            return result;
+        }
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -623,6 +634,40 @@ namespace OnlineTester
             }
         }
 
+        private void selectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Comma-seperated values (*.csv)|*.txt|All files (*.*)|*.*";
+            sfd.Title = "Save results to file";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string file = sfd.FileName;
+                    using (StreamWriter w = new StreamWriter(file))
+                    {
+                        string line = "";
+                        for (int i = 0; i < dgCount; i++)
+                        {
+                            if (isSelected(i))
+                            {
+                                line = dgRead(i, 0);
+                                for (int j = 1; j < 5; j++)
+                                {
+                                    line += "," + dgRead(i, j);
+                                }
+                                w.WriteLine(line);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: Unable to save file." + Environment.NewLine + Environment.NewLine + ex, "Error");
+                }
+            }
+        }
+
         private void hostListToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -753,5 +798,6 @@ namespace OnlineTester
                 //no changes
             }
         }
+
     }
 }
