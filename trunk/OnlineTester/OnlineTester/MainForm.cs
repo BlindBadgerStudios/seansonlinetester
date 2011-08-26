@@ -84,6 +84,7 @@ namespace OnlineTester
             }
             lblMainStatus.Text = newStatus;
         }
+
         private delegate void updateDnsStatusDelegate(string newStatus);
         private void updateDnsStatus(string newStatus)
         {
@@ -286,9 +287,13 @@ namespace OnlineTester
                 for (int i = 0; i < dgCount; i++)
                 {
                     dgComputers.Rows[i].Cells[2].Value = "";
+                    dgComputers.Rows[i].Cells[2].Style.BackColor = Color.White;
                     dgComputers.Rows[i].Cells[3].Value = "";
+                    dgComputers.Rows[i].Cells[3].Style.BackColor = Color.White;
                     dgComputers.Rows[i].Cells[4].Value = "";
+                    dgComputers.Rows[i].Cells[4].Style.BackColor = Color.White;
                     dgComputers.Rows[i].Cells[5].Value = "";
+                    dgComputers.Rows[i].Cells[5].Style.BackColor = Color.White;
                 }
                 lblMainStatus.Text = "Starting Main Thread";
                 mainThread = new Thread(new ThreadStart(mainThreadRun));
@@ -332,6 +337,7 @@ namespace OnlineTester
             updateMainStatus("Main Thread Ready");
         }
 
+        //attempt to resolve DNS and double check results (in case of bad DNS configuration)
         private void dnsThreadRun()
         {
             IPHostEntry iph1;
@@ -372,25 +378,66 @@ namespace OnlineTester
                     }
                     dgInput(i, 0, iph1.HostName);
                 }
-                else
+                else //!isIP
                 {
-                    if (!(getHost(i).ToLower() == iph1.HostName.ToLower().Substring(0, iph1.HostName.IndexOf('.'))))
+                    try
                     {
-                        //output error to row
-                        dgInput(i, 2, "Error: Bad DNS Entry");
-                        dgInput(i, 3, "Error: Bad DNS Entry");
-                        dgInput(i, 4, "Error: Bad DNS Entry");
-                        dgInput(i, 5, "Error: Bad DNS Entry");
+                        //check for cases where FQDN does not return...meaning there are no '.' characters in the  name
+                        string myhost = getHost(i).ToLower();
+                        string resulthost = iph1.HostName.ToLower();
+                        if (getHost(i).ToLower().Contains('.'))
+                        {
+                            myhost = getHost(i).ToLower().Substring(0, getHost(i).IndexOf('.'));
+                        }
+
+                        if (iph1.HostName.ToLower().Contains('.'))
+                        {
+                            resulthost = iph1.HostName.ToLower().Substring(0, iph1.HostName.IndexOf('.'));
+                        }                        
+
+                        //check if the hostname doesn't match what we attempted to resolve from user-entry
+                        if (!(myhost == resulthost))
+                        {
+                            //output error to row
+                            dgInput(i, 2, "Error: Bad DNS Entry");
+                            dgInput(i, 3, "Error: Bad DNS Entry");
+                            dgInput(i, 4, "Error: Bad DNS Entry");
+                            dgInput(i, 5, "Error: Bad DNS Entry");
+
+                        }
+
+                        //loop through address list and look for an IPv4 address
+                        dgInput(i, 1, getipv4(iph1));
+                    }
+                    catch (Exception ex)
+                    {
 
                     }
-                    dgInput(i, 1, iph1.AddressList.First().ToString());
                 }
+
                 //this is to allow for interruption
                 Thread.Sleep(1);
             }
             updateDnsStatus("DNS Resolution Complete");
             Thread.Sleep(2000);
             updateDnsStatus("DNS Thread Ready");
+        }
+
+        //extract an IPv4 address from an IPHostEntry or spit out error text
+        private string getipv4(IPHostEntry host)
+        {
+            string result = "Err: No IPv4 Found";
+
+            for (int n = 0; n < host.AddressList.Length; n++)
+            {
+                //if it's a valid IPv4 address, output it
+                if (host.AddressList[n].ToString().Contains('.'))
+                {
+                    result = host.AddressList[n].ToString();
+                }
+            }
+
+            return result;
         }
 
         private void pingThreadRun()
@@ -403,6 +450,7 @@ namespace OnlineTester
                 //if resolution is not yet complete for this row, sleep until it is
                 while (dgRead(i, 0).Length < 1 || dgRead(i, 1).Length < 1)
                 {
+                    updatePingStatus("Ping Thread Waiting...");
                     Thread.Sleep(1);
                 }
 
@@ -454,6 +502,7 @@ namespace OnlineTester
                 //wait for other threads to finish if we end up moving too fast
                 while (dgRead(i, 2).Length < 1)
                 {
+                    updateSvcStatus("Service Thread Waiting...");
                     Thread.Sleep(1);
                 }
 
@@ -466,7 +515,7 @@ namespace OnlineTester
                 if (checkSvc())
                 {
                     target = dgRead(i, 0);
-                    updateWmiStatus("WMI: Checking OS Version (" + target + ")");
+                    updateSvcStatus("Service Thread: Checking Service (" + target + ")");
                     dgInput(i, 3, checkService(target));
                 }
 
@@ -523,11 +572,12 @@ namespace OnlineTester
                 //wait for other threads to finish if we end up moving too fast
                 while (dgRead(i, 2).Length < 1)
                 {
+                    updateWmiStatus("WMI Thread Waiting...");
                     Thread.Sleep(1);
                 }
 
                 //skip over offline or error readings
-                if (dgRead(i, 4).ToLower().StartsWith("error") || dgRead(i, 4).ToLower().StartsWith("offline"))
+                if (dgRead(i, 3).ToLower().StartsWith("err") || dgRead(i, 3).ToLower().StartsWith("offline"))
                 {
                     continue;
                 }
