@@ -27,7 +27,7 @@ namespace OnlineTester
 {
     public partial class MainForm : Form
     {
-        private Thread mainThread, pingThread, dnsThread, svcThread, wmiThread;
+        private Thread mainThread, pingThread, dnsThread, svcThread, wmiThread, assassinThread;
         private ConnectionOptions oConn = new ConnectionOptions();
         private bool altCred = false;
         private string userN = "";
@@ -45,12 +45,32 @@ namespace OnlineTester
         }
 
         #region Threadsafe Status Methods
-        private delegate bool checkUserDelegate();
+        private delegate void enableButtonDelegate(bool tf);
+        private void enableButton(bool tf)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new enableButtonDelegate(enableButton), new object[] { tf });
+            }
+
+            if (tf)
+            {
+                btnGo.Enabled = true;
+                btnGo.Text = "Run Tests";
+            }
+            else
+            {
+                btnGo.Enabled = false;
+                btnGo.Text = "Stopping Tests";
+            }
+        }
+
+        private delegate bool checkWMIDelegate();
         private bool checkWMI()
         {
             if (InvokeRequired)
             {
-                Invoke(new checkUserDelegate(checkWMI));
+                Invoke(new checkWMIDelegate(checkWMI));
             }
             return chkUser.Checked;
         }
@@ -184,9 +204,14 @@ namespace OnlineTester
             return dgComputers.Rows[y].Cells[x].Value.ToString();
         }
 
-        private delegate bool dgThreadComplete();
+        private delegate bool threadCompleteDelegate();
         private bool threadComplete()
         {
+            if (InvokeRequired)
+            {
+                Invoke(new threadCompleteDelegate(threadComplete));
+            }
+
             if (lblDnsStatus.Text == "DNS Thread Ready" &&
                 lblPingStatus.Text == "Ping Thread Ready" &&
                 lblSvcStatus.Text == "Service Thread Ready" &&
@@ -261,22 +286,11 @@ namespace OnlineTester
             //stop threads if they are running
             if (btnGo.Text == "Stop Tests")
             {
-                btnGo.Text = "Stopping Tests";
-                btnGo.Enabled = false;
                 //kill threads
-                dnsThread.Abort();
-                pingThread.Abort();
-                wmiThread.Abort();
-                timer1.Stop();
+                assassinThread = new Thread(new ThreadStart(assassinThreadRun));
+                assassinThread.Start();
 
-                while (mainThread.ThreadState == ThreadState.Running || mainThread.ThreadState == ThreadState.WaitSleepJoin)
-                {
-                    //sit and spin until threads are dead
-                    lblMainStatus.Text = "Stopping...";
-                }
-                lblMainStatus.Text = "Main Thread Ready";
-                btnGo.Enabled = true;
-                btnGo.Text = "Run Tests";
+                timer1.Stop();
             }
             else
             {
@@ -304,6 +318,41 @@ namespace OnlineTester
         }
 
         #region Threaded Operations
+        //kill all others threads (Hit List: MainThread and it's spawn, dnsThread, pingThread, svcThread, wmiThread)
+        private void assassinThreadRun()
+        {
+            enableButton(false);
+            try
+            {
+                wmiThread.Abort();
+                svcThread.Abort();
+                pingThread.Abort();
+                dnsThread.Abort();
+                mainThread.Abort();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            while (wmiThread.ThreadState == ThreadState.Running || wmiThread.ThreadState == ThreadState.WaitSleepJoin
+                || svcThread.ThreadState == ThreadState.Running || svcThread.ThreadState == ThreadState.WaitSleepJoin
+                || pingThread.ThreadState == ThreadState.Running || pingThread.ThreadState == ThreadState.WaitSleepJoin
+                || dnsThread.ThreadState == ThreadState.Running || dnsThread.ThreadState == ThreadState.WaitSleepJoin
+                || mainThread.ThreadState == ThreadState.Running || mainThread.ThreadState == ThreadState.WaitSleepJoin)
+            {
+                //sit and spin until all threads are dead
+                Thread.Sleep(1000);
+            }
+
+            updateDnsStatus("DNS Thread Ready");
+            updatePingStatus("Ping Thread Ready");
+            updateSvcStatus("Service Thread Ready");
+            updateWmiStatus("WMI Thread Ready");
+            updateMainStatus("Main Thread Ready");
+
+            enableButton(true);
+        }
+
         private void mainThreadRun()
         {
             //perform name resolution
@@ -348,6 +397,10 @@ namespace OnlineTester
             {
                 updateDnsStatus("DNS: Resolving " + getHost(i));
                 isIP = IPAddress.TryParse(getHost(i), out ipDump);
+                
+                //this is to allow for interruption
+                Thread.Sleep(1);
+                
                 //perform resolution
                 try
                 {
@@ -393,7 +446,10 @@ namespace OnlineTester
                         if (iph1.HostName.ToLower().Contains('.'))
                         {
                             resulthost = iph1.HostName.ToLower().Substring(0, iph1.HostName.IndexOf('.'));
-                        }                        
+                        }
+
+                        //this is to allow for interruption
+                        Thread.Sleep(1);
 
                         //check if the hostname doesn't match what we attempted to resolve from user-entry
                         if (!(myhost == resulthost))
@@ -517,6 +573,9 @@ namespace OnlineTester
                     target = dgRead(i, 0);
                     updateSvcStatus("Service Thread: Checking Service (" + target + ")");
                     dgInput(i, 3, checkService(target));
+                    
+                    //this is to allow for interruption
+                    Thread.Sleep(1);
                 }
 
                 //this is to allow for interruption
@@ -586,6 +645,10 @@ namespace OnlineTester
                 {
                     target = dgRead(i, 0);
                     updateWmiStatus("WMI: Checking OS Version (" + target + ")");
+
+                    //this is to allow for interruption
+                    Thread.Sleep(1);
+
                     dgInput(i, 4, wmiCheckOS(target));
                 }
 
@@ -595,6 +658,10 @@ namespace OnlineTester
                 if (checkWMI())
                 {
                     updateWmiStatus("WMI: Checking " + dgComputers.Columns[4].HeaderText + " (" + target + ")");
+
+                    //this is to allow for interruption
+                    Thread.Sleep(1);
+
                     dgInput(i, 5, wmiCheckCustom(target));
                 }
 
@@ -618,6 +685,8 @@ namespace OnlineTester
                 ManagementObjectCollection oCollection = oSearcher.Get();
                 foreach (ManagementObject oReturn in oCollection)
                 {
+                    //this is to allow for interruption
+                    Thread.Sleep(1);
                     returnme = oReturn["Caption"].ToString().Replace("Microsoft ", "").Replace("Windows", "Win");
                 }
             }
@@ -652,6 +721,10 @@ namespace OnlineTester
                     returnme = "<Empty>";
                 }
             }
+
+            //this is to allow for interruption
+            Thread.Sleep(1);
+
             return returnme;
         }
         #endregion
