@@ -413,7 +413,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: No DNS Entry");
                     dgInput(i, 3, "Error: No DNS Entry");
                     dgInput(i, 4, "Error: No DNS Entry");
-                    dgInput(i, 5, "Error: No DNS Entry");
+                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
                     continue;
                 }
 
@@ -423,10 +423,18 @@ namespace OnlineTester
                     if (!iph1.AddressList.Contains(IPAddress.Parse(getHost(i))))
                     {
                         //output error to row
-                        dgInput(i, 2, "Error: Bad DNS Entry");
-                        dgInput(i, 3, "Error: Bad DNS Entry");
-                        dgInput(i, 4, "Error: Bad DNS Entry");
-                        dgInput(i, 5, "Error: Bad DNS Entry");
+                        dgInput(i, 2, "Error: Bad DNS Entry (IP)");
+                        dgInput(i, 3, "Error: Bad DNS Entry (IP)");
+                        dgInput(i, 4, "Error: Bad DNS Entry (IP)");
+
+                        //loop through all addresses and list them in a string for use in the error
+                        string addressList = "[";
+                        for (int q=0; q<iph1.AddressList.Length; q++) {
+                            addressList += iph1.AddressList[q].ToString() + ", ";
+                        }
+                        addressList += "]";
+
+                        dgInput(i, 5, getHost(i) + " != " + addressList);
 
                     }
                     dgInput(i, 0, iph1.HostName);
@@ -455,10 +463,10 @@ namespace OnlineTester
                         if (!(myhost == resulthost))
                         {
                             //output error to row
-                            dgInput(i, 2, "Error: Bad DNS Entry");
-                            dgInput(i, 3, "Error: Bad DNS Entry");
-                            dgInput(i, 4, "Error: Bad DNS Entry");
-                            dgInput(i, 5, "Error: Bad DNS Entry");
+                            dgInput(i, 2, "Error: Bad DNS Entry (Name)");
+                            dgInput(i, 3, "Error: Bad DNS Entry (Name)");
+                            dgInput(i, 4, "Error: Bad DNS Entry (Name)");
+                            dgInput(i, 5, myhost + " != " + resulthost);
 
                         }
 
@@ -467,7 +475,7 @@ namespace OnlineTester
                     }
                     catch (Exception ex)
                     {
-
+                        dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
                     }
                 }
 
@@ -538,7 +546,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: Ping");
                     dgInput(i, 3, "Error: Ping");
                     dgInput(i, 4, "Error: Ping");
-                    dgInput(i, 5, "Error: Ping");
+                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
                 }
                 //this is to allow for interruption
                 Thread.Sleep(1);
