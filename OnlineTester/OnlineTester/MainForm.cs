@@ -413,7 +413,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: No DNS Entry");
                     dgInput(i, 3, "Error: No DNS Entry");
                     dgInput(i, 4, "Error: No DNS Entry");
-                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
+                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':') + 1, (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':') - 2)).Trim());
                     continue;
                 }
 
@@ -475,7 +475,9 @@ namespace OnlineTester
                     }
                     catch (Exception ex)
                     {
-                        dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
+                        //MessageBox.Show(ex.ToString());
+                        string errortxt = ex.ToString().Substring(ex.ToString().IndexOf(':') + 1, (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':') - 2));
+                        dgInput(i, 5, errortxt.Trim());
                     }
                 }
 
@@ -546,7 +548,7 @@ namespace OnlineTester
                     dgInput(i, 2, "Error: Ping");
                     dgInput(i, 3, "Error: Ping");
                     dgInput(i, 4, "Error: Ping");
-                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':'), (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':'))));
+                    dgInput(i, 5, ex.ToString().Substring(ex.ToString().IndexOf(':') + 1, (ex.ToString().IndexOf("at") - ex.ToString().IndexOf(':') - 2)).Trim());
                 }
                 //this is to allow for interruption
                 Thread.Sleep(1);
@@ -571,7 +573,7 @@ namespace OnlineTester
                 }
 
                 //skip over offline or error readings
-                if (dgRead(i, 4).ToLower().StartsWith("error") || dgRead(i, 4).ToLower().StartsWith("offline"))
+                if (dgRead(i, 2).ToLower().StartsWith("error") || dgRead(i, 2).ToLower().StartsWith("offline"))
                 {
                     continue;
                 }
@@ -783,7 +785,7 @@ namespace OnlineTester
                             if (isSelected(i))
                             {
                                 line = dgRead(i, 0);
-                                for (int j = 1; j < 5; j++)
+                                for (int j = 1; j < 6; j++)
                                 {
                                     line += "," + dgRead(i, j);
                                 }
@@ -842,7 +844,7 @@ namespace OnlineTester
                         for (int i = 0; i < dgCount; i++)
                         {
                             line = dgRead(i, 0);
-                            for (int j = 1; j < 5; j++)
+                            for (int j = 1; j < 6; j++)
                             {
                                 line += "," + dgRead(i, j);
                             }
