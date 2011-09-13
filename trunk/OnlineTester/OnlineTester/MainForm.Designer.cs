@@ -428,7 +428,7 @@
             this.Controls.Add(this.dgComputers);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Online Tester 4.2 Beta r7";
+            this.Text = "Online Tester 4.2 Beta r10";
             ((System.ComponentModel.ISupportInitialize)(this.dgComputers)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
