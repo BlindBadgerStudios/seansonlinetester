@@ -23,6 +23,7 @@ using System.ServiceProcess;
 //- Add option to turn off dns double verification
 //- Add support for IPv6
 //- Add support for auto-updating to newest published version
+//- Finish LogIt function for logging of actions and exceptions, add logging levels
 namespace OnlineTester
 {
     public partial class MainForm : Form
@@ -226,6 +227,14 @@ namespace OnlineTester
         }
         #endregion
 
+        private bool LogIt(string LogEntry)
+        {
+            //open the log file and put the entry in
+            //if opening the log file fails, return false
+            //else
+            return true;
+        }
+
         //return whether any cell in this row is selected
         private bool isSelected(int i)
         {
@@ -332,6 +341,7 @@ namespace OnlineTester
             }
             catch (Exception ex)
             {
+                LogIt(ex.ToString());
             }
 
             while (wmiThread.ThreadState == ThreadState.Running || wmiThread.ThreadState == ThreadState.WaitSleepJoin
@@ -703,6 +713,7 @@ namespace OnlineTester
             catch (Exception ex)
             {
                 returnme = "Error: WMI";
+                LogIt(ex.ToString());
             }
             return returnme;
         }
